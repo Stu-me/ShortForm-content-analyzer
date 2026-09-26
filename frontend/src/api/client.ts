@@ -56,7 +56,19 @@ api.interceptors.response.use(null, (error) => {
 
   if (error.response?.status === 401) {
     window.location.href = '/auth'
+    return Promise.reject(error)
   }
+
+  // Extract the server's error message if present, e.g. { error: { message: "..." } }
+  const serverMessage: string | undefined =
+    error.response?.data?.error?.message ??
+    error.response?.data?.message ??
+    error.response?.data?.msg
+
+  if (serverMessage) {
+    return Promise.reject(new Error(serverMessage))
+  }
+
   return Promise.reject(error)
 })
 

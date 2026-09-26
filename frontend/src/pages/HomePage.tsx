@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '../store/auth.store'
 import { useAnalyse } from '../hooks/useAnalyse'
+import { useTheme } from '../hooks/useTheme'
 import { AnalyseForm } from '../components/AnalyseForm'
 import { ResultCard } from '../components/ResultCard'
 import { HistoryList } from '../components/HistoryList'
@@ -13,6 +14,7 @@ import logo from "../assets/logo.png"
 export const HomePage = () => {
   const { userName, signOut } = useAuthStore()
   const { result, loading, error, analyse, reset } = useAnalyse()
+  const { theme, toggle: toggleTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
 
@@ -72,6 +74,26 @@ export const HomePage = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{userName}</span>
+            <button
+              onClick={(e) => toggleTheme(e)}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              style={{
+                background: 'none',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                fontSize: 14,
+                height: 30,
+                width: 30,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'border-color .15s, color .15s',
+              }}
+            >
+              {theme === 'dark' ? '☀︎' : '☾'}
+            </button>
             <Button variant="ghost" onClick={handleSignOut} loading={signingOut} style={{ height: 30, fontSize: 12 }}>
               Sign out
             </Button>
@@ -108,8 +130,20 @@ export const HomePage = () => {
 
           {/* Error */}
           {error && !loading && (
-            <div style={{ marginTop: 24, padding: '12px 16px', background: '#ef444410', border: '1px solid #ef444425', borderRadius: 8 }}>
-              <p style={{ fontSize: 13, color: 'var(--red)' }}>{error}</p>
+            <div style={{
+              marginTop: 24,
+              padding: '14px 18px',
+              background: 'rgba(185, 64, 64, 0.07)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(185, 64, 64, 0.22)',
+              borderRadius: 10,
+              boxShadow: '0 4px 24px rgba(185, 64, 64, 0.08), inset 0 1px 0 rgba(255,255,255,0.18)',
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--red)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+                ⚠ Error
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--red)', lineHeight: 1.6, wordBreak: 'break-word' }}>{error}</p>
             </div>
           )}
 
