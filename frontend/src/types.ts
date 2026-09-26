@@ -31,3 +31,17 @@ export interface HistoryItem {
 export interface ApiError {
   msg: string
 }
+
+export type ErrorKind =
+  | 'overloaded'   // 503 — model / service under heavy load
+  | 'rate_limited' // 429 — too many requests from this client
+  | 'not_found'    // 404 — bad URL / resource missing
+  | 'auth'         // 401/403 — session expired
+  | 'network'      // no response at all
+  | 'unknown'      // anything else
+
+export interface AppError {
+  kind: ErrorKind
+  title: string
+  detail: string
+}

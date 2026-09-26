@@ -81,6 +81,27 @@ return;
     return
   }
 
+  // Google / Gemini API errors carry a nested { error: { code, message, status } } shape
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "error" in err &&
+    typeof (err as { error: unknown }).error === "object" &&
+    (err as { error: { code?: unknown } }).error !== null &&
+    "code" in ((err as { error: object }).error) &&
+    "message" in ((err as { error: object }).error)
+  ) {
+    const googleErr = (err as { error: { code: number; message: string } }).error;
+    const statusCode = typeof googleErr.code === "number" && googleErr.code >= 400 && googleErr.code < 600
+      ? googleErr.code
+      : 502;
+    res.status(statusCode).json({
+      success: false,
+      message: googleErr.message,
+    });
+    return;
+  }
+
 res.status(500).json({
   success:false,
   message:"Internal Server Error",

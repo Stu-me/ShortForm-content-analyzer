@@ -52,24 +52,89 @@ export const api = axios.create({
 })
 
 
-api.interceptors.response.use(null, (error) => {
+import type { AppError, ErrorKind } from '../types'
 
-  if (error.response?.status === 401) {
-    window.location.href = '/auth'
-    return Promise.reject(error)
+function buildAppError(error: unknown): AppError {
+  // No response at all — network / CORS / server down
+  if (!isAxiosError(error) || !error.response) {
+    return {
+      kind: 'network',
+      title: 'Cannot reach the server',
+      detail: 'Check your internet connection or try again in a moment.',
+    }
   }
 
-  // Extract the server's error message if present, e.g. { error: { message: "..." } }
+  const status = error.response.status
+  const data = error.response.data as Record<string, unknown> | null | undefined
+  const nestedError = data?.error as Record<string, unknown> | undefined
   const serverMessage: string | undefined =
-    error.response?.data?.error?.message ??
-    error.response?.data?.message ??
-    error.response?.data?.msg
+    (typeof nestedError?.message === 'string' ? nestedError.message : undefined) ??
+    (typeof data?.message === 'string' ? data.message as string : undefined) ??
+    (typeof data?.msg === 'string' ? data.msg as string : undefined)
 
-  if (serverMessage) {
-    return Promise.reject(new Error(serverMessage))
+  // Map status codes → ErrorKind + user-friendly copy
+  const map: Record<number, { kind: ErrorKind; title: string; detail: string }> = {
+    429: {
+      kind: 'rate_limited',
+      title: 'Too many requests',
+      detail: 'You\'ve hit the rate limit. Wait a minute before trying again.',
+    },
+    503: {
+      kind: 'overloaded',
+      title: 'Service is under high demand',
+      detail: serverMessage ?? 'The AI model is temporarily overwhelmed. Spikes are usually short — please try again in a few seconds.',
+    },
+    502: {
+      kind: 'overloaded',
+      title: 'Service temporarily unavailable',
+      detail: serverMessage ?? 'The server returned a bad gateway. This is usually temporary.',
+    },
+    404: {
+      kind: 'not_found',
+      title: 'Content not found',
+      detail: serverMessage ?? 'The URL you submitted couldn\'t be found or isn\'t supported yet.',
+    },
+    401: {
+      kind: 'auth',
+      title: 'Session expired',
+      detail: 'You\'ve been signed out. Please log in again.',
+    },
+    403: {
+      kind: 'auth',
+      title: 'Access denied',
+      detail: serverMessage ?? 'You don\'t have permission to perform this action.',
+    },
   }
 
-  return Promise.reject(error)
+  const matched = map[status]
+  if (matched) return matched
+
+  // 5xx catchall
+  if (status >= 500) {
+    return {
+      kind: 'unknown',
+      title: `Server error (${status})`,
+      detail: serverMessage ?? 'Something went wrong on our end. Please try again shortly.',
+    }
+  }
+
+  // 4xx catchall
+  return {
+    kind: 'unknown',
+    title: `Request error (${status})`,
+    detail: serverMessage ?? 'The request could not be completed. Check the URL and try again.',
+  }
+}
+
+function isAxiosError(err: unknown): err is import('axios').AxiosError {
+  return typeof err === 'object' && err !== null && (err as Record<string, unknown>).isAxiosError === true
+}
+
+api.interceptors.response.use(null, (error) => {
+  if (isAxiosError(error) && error.response?.status === 401) {
+    window.location.href = '/auth'
+  }
+  return Promise.reject(buildAppError(error))
 })
 
 

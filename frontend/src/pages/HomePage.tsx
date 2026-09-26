@@ -5,6 +5,7 @@ import { useTheme } from '../hooks/useTheme'
 import { AnalyseForm } from '../components/AnalyseForm'
 import { ResultCard } from '../components/ResultCard'
 import { HistoryList } from '../components/HistoryList'
+import { ErrorBanner } from '../components/ErrorBanner'
 import { Button } from '../components/ui/Button'
 import type { AnalysisResult } from '../types'
 import logo from "../assets/logo.png"
@@ -129,23 +130,7 @@ export const HomePage = () => {
           )}
 
           {/* Error */}
-          {error && !loading && (
-            <div style={{
-              marginTop: 24,
-              padding: '14px 18px',
-              background: 'rgba(185, 64, 64, 0.07)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(185, 64, 64, 0.22)',
-              borderRadius: 10,
-              boxShadow: '0 4px 24px rgba(185, 64, 64, 0.08), inset 0 1px 0 rgba(255,255,255,0.18)',
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--red)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-                ⚠ Error
-              </p>
-              <p style={{ fontSize: 13, color: 'var(--red)', lineHeight: 1.6, wordBreak: 'break-word' }}>{error}</p>
-            </div>
-          )}
+          {error && !loading && <ErrorBanner error={error} />}
 
           {/* Result */}
           {displayed && !loading && (
