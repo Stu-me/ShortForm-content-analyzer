@@ -10,11 +10,11 @@ function getInitial(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function apply(theme: Theme) {
+function applyTheme(theme: Theme) {
   document.documentElement.setAttribute('data-theme', theme)
 }
 
-/** Largest circle that covers the whole viewport from a given point. */
+/** Largest circle radius that covers the full viewport from point (x, y). */
 function maxRadius(x: number, y: number): number {
   const w = window.innerWidth
   const h = window.innerHeight
@@ -24,37 +24,38 @@ function maxRadius(x: number, y: number): number {
 export const useTheme = () => {
   const [theme, setTheme] = useState<Theme>(() => {
     const t = getInitial()
-    apply(t)
+    applyTheme(t)
     return t
   })
 
+  // Keep data-theme attribute in sync whenever theme state changes
   useEffect(() => {
-    apply(theme)
+    applyTheme(theme)
     localStorage.setItem(STORAGE_KEY, theme)
   }, [theme])
 
-  /**
-   * Pass the click MouseEvent so the ripple originates from the button.
-   * Falls back gracefully when the View Transition API isn't available.
-   */
   const toggle = (e?: React.MouseEvent) => {
     const x = e?.clientX ?? window.innerWidth / 2
     const y = e?.clientY ?? window.innerHeight / 2
     const r = maxRadius(x, y)
-
     const next: Theme = theme === 'dark' ? 'light' : 'dark'
 
-    // View Transition API not supported — just swap instantly
+    // No View Transition support — instant swap
     if (!document.startViewTransition) {
       setTheme(next)
       return
     }
 
+    // startViewTransition captures the CURRENT page as the "old" snapshot,
+    // then calls our callback to mutate the DOM into the "new" state.
+    // We must NOT call applyTheme() here manually — setTheme triggers the
+    // useEffect which calls applyTheme(), which is exactly what the API needs.
     const transition = document.startViewTransition(() => {
       setTheme(next)
-      apply(next)
     })
 
+    // Once both snapshots are ready and the pseudo-elements exist, animate
+    // the new snapshot expanding as a circle from the click origin.
     transition.ready.then(() => {
       document.documentElement.animate(
         {
