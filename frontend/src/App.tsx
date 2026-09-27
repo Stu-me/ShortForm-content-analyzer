@@ -25,9 +25,12 @@
 
 
 
+import { useEffect, useState } from 'react'
 import { useAuthStore } from './store/auth.store'
+import { api } from './api/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthPage } from './pages/AuthPage'
+import { BufferingPage } from './pages/BufferingPage'
 import { HomePage } from './pages/HomePage'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -42,6 +45,30 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 
 export const App = () => {
+  const [serverReady, setServerReady] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    let retryTimer: ReturnType<typeof setTimeout>
+
+    const checkServer = async () => {
+      try {
+        await api.get('/health')
+        if (active) setServerReady(true)
+      } catch {
+        if (active) retryTimer = setTimeout(checkServer, 2000)
+      }
+    }
+
+    checkServer()
+    return () => {
+      active = false
+      clearTimeout(retryTimer)
+    }
+  }, [])
+
+  if (!serverReady) return <BufferingPage />
+
   return < BrowserRouter >
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />

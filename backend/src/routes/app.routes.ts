@@ -10,6 +10,9 @@ import { AnalyzeSchema } from "../validate/app.validate.js";
 
 export const appRouter = Router();
 
+appRouter.get("/health", (_req, res) => {
+	res.json({ ok: true });
+});
 
 appRouter.post("/analyze", verifyUser, validate(AnalyzeSchema), contentAnalisisController);
 

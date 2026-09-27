@@ -1,28 +1,63 @@
 import YTD from "yt-dlp-exec";
 import { analyzeVideo, type Analysis } from './summery.LLM.service.js';
-
 import { logger } from "../utility/logger.utility.js";
 import { AppError } from "../errors/AppErrors.errors.js";
 import path from "node:path";
 import fs from "node:fs";
 
+// ── Platform detection ────────────────────────────────────────────────────────
+
+type Platform =
+  | 'instagram' | 'youtube' | 'tiktok'
+  | 'reddit'    | 'pinterest' | 'facebook'
+  | 'snapchat'  | 'x'
+
+const DOMAIN_MAP: Record<string, Platform> = {
+  'instagram.com':  'instagram',
+  'youtube.com':    'youtube',
+  'youtu.be':       'youtube',
+  'tiktok.com':     'tiktok',
+  'vm.tiktok.com':  'tiktok',
+  'reddit.com':     'reddit',
+  'v.redd.it':      'reddit',
+  'pinterest.com':  'pinterest',
+  'pin.it':         'pinterest',
+  'facebook.com':   'facebook',
+  'fb.watch':       'facebook',
+  'snapchat.com':   'snapchat',
+  'twitter.com':    'x',
+  'x.com':          'x',
+}
+
+function detectPlatform(url: string): Platform {
+  let hostname: string
+  try {
+    hostname = new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    throw new AppError('Invalid URL — could not parse the link.', 422)
+  }
+
+  const platform = DOMAIN_MAP[hostname]
+  if (!platform) {
+    throw new AppError(
+      `"${hostname}" isn't supported yet. Paste a link from Instagram, YouTube, TikTok, Reddit, Pinterest, Facebook, Snapchat or X.`,
+      422
+    )
+  }
+
+  return platform
+}
+
 
 
 export const download = async (URL: string) => {
 
+  // ── 1. Detect & validate platform ────────────────────────────────────────
+  const platform = detectPlatform(URL)
+  logger.info(`Platform detected: ${platform}`)
 
-
-  // const options: any = {
-  //   preferFreeFormats: true,
-  //   dumpSingleJson: true,   
-  //   noWarnings: true,
-  //   cookies: URL.includes("instagram")=== true ?'/app/cookies.txt': null,
-  //   addHeader: ['referer:instagram.com',
-  //     'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'] as any
-  // };
-
-  const isInstagram = URL.includes("instagram.com");
-  const isYouTube = URL.includes("youtube.com") || URL.includes("youtu.be");
+  const isInstagram = platform === 'instagram'
+  const isYouTube   = platform === 'youtube'
 
 
 
