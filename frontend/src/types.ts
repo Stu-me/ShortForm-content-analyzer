@@ -5,17 +5,29 @@ export interface TranscriptionEntry {
 
 export interface AnalysisResult {
   title: string
+  source: {
+    url: string
+    platform: string
+    contentType: string
+    author: string
+    publishedAt: string
+  }
   summary: {
     overview: string
     keyPoints: string[]
   }
   transcription: TranscriptionEntry[]
   verification: {
+    claims: {
+      claim: string
+      verdict: 'true' | 'false' | 'misleading' | 'unverified'
+      explanation: string
+    }[]
+    overallVerdict: string
     factCheckReport: string
-    verdict: 'accurate' | 'inaccurate' | 'partially accurate'
   }
   resources: {
-    platform: string
+    title: string
     url: string
     relevance: string
   }[]

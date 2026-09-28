@@ -384,7 +384,15 @@ if (!apiKey) {
 }
 const ai = new GoogleGenAI({ apiKey });
 
-export async function analyzeVideo(cdnURL: string): Promise<Analysis> {
+export interface AnalysisSourceContext {
+  originalUrl: string
+  platform: string
+}
+
+export async function analyzeVideo(cdnURL: string, source: AnalysisSourceContext): Promise<Analysis> {
+  const sourceUrlJson = JSON.stringify(source.originalUrl)
+  const sourcePlatformJson = JSON.stringify(source.platform)
+
   // CRITICAL: We rewrite the prompt to FORBADE the model from skipping fact checking.
   const promptText = `You are a Web Content & Video Analysis AI. Your job is to deeply analyze the provided video.
 
@@ -403,7 +411,7 @@ ABSOLUTE RULE — YOUR ENTIRE RESPONSE MUST BE CONTAINED WITHIN A MARKDOWN JSON 
 Return this exact structure:
 {
   "title": "string with 1 relevant emoji at start",
-  "source": { "url": "${cdnURL}", "platform": "Instagram", "contentType": "video", "author": "unknown", "publishedAt": "" },
+  "source": { "url": ${sourceUrlJson}, "platform": ${sourcePlatformJson}, "contentType": "video", "author": "unknown", "publishedAt": "" },
   "summary": { "overview": "3-5 sentence detailed overview", "keyPoints": [] },
   "transcription": [{ "timestamp": "MM:SS", "text": "verbatim text" }],
   "verification": {
@@ -426,10 +434,15 @@ Return this exact structure:
   ]
 }`;
 
+  const isYoutubeWatchUri =
+    /youtube\.com\/watch\?v=|youtu\.be\//i.test(cdnURL)
+
   const response = await ai.models.generateContent({
     model: "gemini-3.8-flash",
     contents: [
-      { fileData: { fileUri: cdnURL, mimeType: "video/mp4" } },
+      isYoutubeWatchUri
+        ? { fileData: { fileUri: cdnURL } }
+        : { fileData: { fileUri: cdnURL, mimeType: "video/mp4" } },
       { text: promptText }
     ]
   });

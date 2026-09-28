@@ -1,9 +1,10 @@
 import type { AnalysisResult } from '../types'
 
 const VERDICT_STYLE: Record<string, React.CSSProperties> = {
-  accurate: { color: '#22c55e', background: '#22c55e12', borderColor: '#22c55e25' },
-  inaccurate: { color: '#ef4444', background: '#ef444412', borderColor: '#ef444425' },
-  'partially accurate': { color: '#eab308', background: '#eab30812', borderColor: '#eab30825' },
+  true: { color: '#22c55e', background: '#22c55e12', borderColor: '#22c55e25' },
+  false: { color: '#ef4444', background: '#ef444412', borderColor: '#ef444425' },
+  misleading: { color: '#eab308', background: '#eab30812', borderColor: '#eab30825' },
+  unverified: { color: '#94a3b8', background: '#94a3b812', borderColor: '#94a3b825' },
 }
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -16,7 +17,8 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 )
 
 export const ResultCard = ({ result }: { result: AnalysisResult }) => {
-  const vs = VERDICT_STYLE[result.verification.verdict] ?? VERDICT_STYLE['partially accurate']
+  const firstClaimVerdict = result.verification.claims[0]?.verdict ?? 'unverified'
+  const vs = VERDICT_STYLE[firstClaimVerdict] ?? VERDICT_STYLE.unverified
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 24 }}>
@@ -29,6 +31,10 @@ export const ResultCard = ({ result }: { result: AnalysisResult }) => {
       {/* Overview */}
       <p style={{ fontSize: 13, color: 'var(--muted2)', lineHeight: 1.7 }}>
         {result.summary.overview}
+      </p>
+
+      <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 10 }}>
+        {result.source.platform} · {result.source.contentType}
       </p>
 
       {/* Key points */}
@@ -51,12 +57,25 @@ export const ResultCard = ({ result }: { result: AnalysisResult }) => {
       <Section title="Fact check">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 20, border: '1px solid', ...vs }}>
-            {result.verification.verdict}
+            {result.verification.overallVerdict}
           </span>
         </div>
         <p style={{ fontSize: 13, color: 'var(--muted2)', lineHeight: 1.7 }}>
           {result.verification.factCheckReport}
         </p>
+        {result.verification.claims.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+            {result.verification.claims.map((claim, i) => (
+              <div key={i} style={{ padding: '10px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 8px', borderRadius: 20, border: '1px solid', ...VERDICT_STYLE[claim.verdict] }}>
+                  {claim.verdict}
+                </span>
+                <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.6, marginTop: 8 }}>{claim.claim}</p>
+                <p style={{ fontSize: 11, color: 'var(--muted)', lineHeight: 1.6, marginTop: 4 }}>{claim.explanation}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </Section>
 
       {/* Transcription */}
@@ -86,7 +105,7 @@ export const ResultCard = ({ result }: { result: AnalysisResult }) => {
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)' }}
               >
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{r.platform}</p>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{r.title}</p>
                   <p style={{ fontSize: 11, color: 'var(--muted)' }}>{r.relevance}</p>
                 </div>
                 <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>↗</span>

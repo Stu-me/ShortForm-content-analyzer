@@ -11,6 +11,7 @@ const configSchema = z.object({
     CLIENT_URI:z.string().min(1,"CLIENT_URI is missing."),
     ARGON2_PEPPER:z.string().min(1,"ARGON2_PEPPER is Missing."),
     GEMINI_KEY:z.string().min(1,"GEMINI_KEY is Missing."),
+    MEDIA_MAX_FILESIZE_MB:z.coerce.number().positive().default(70),
 })
 
 const parse = configSchema.safeParse(process.env);
