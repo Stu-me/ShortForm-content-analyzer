@@ -1,8 +1,4 @@
 
-// import { GoogleGenAI } from "@google/genai"
-// import { EnvConfig } from "../config/env.config.js"
-// import { logger } from "../utility/logger.utility.js"
-
 // const PROMPT = `You are a Web Content & Video Analysis AI. Your job is to deeply analyze the content at the provided URL.
 
 // STEP 1 — Use the Google Search tool to:
@@ -62,98 +58,6 @@
 // }`;
 
 
-// interface TranscriptionEntry {
-//   timestamp: string
-//   text: string
-// }
-
-// export interface Analysis {
-//   title: string
-//   source?: {
-//     url: string
-//     platform: string
-//     contentType: string
-//     author?: string
-//     publishedAt?: string
-//   }
-//   summary: {
-//     overview: string
-//     keyPoints: string[]
-//   }
-//   transcription: TranscriptionEntry[]
-//   verification: {
-//     claims?: {
-//       claim: string
-//       verdict: string
-//       explanation: string
-//     }[]
-//     overallVerdict?: string
-//     factCheckReport: string
-//     verdict?: "accurate" | "inaccurate" | "partially accurate" | "unverified"
-//   }
-//   resources: {
-//     platform: string
-//     url: string
-//     relevance: string
-//   }[]
-// }
-
-
-// const extractJSON = (raw: string): string => {
-//   return raw
-//     .replace(/^```json\s*/i, "")
-//     .replace(/^```\s*/i, "")
-//     .replace(/```\s*$/i, "")
-//     .trim()
-// }
-
-// const geminiAI = new GoogleGenAI({ apiKey: EnvConfig.GEMINI_KEY })
-
-
-
-
-// const analyzeWithGemini = async (cdnURL: string): Promise<Analysis> => {
-
-//   const response = await geminiAI.models.generateContent({
-//     model: "gemini-2.5-flash-lite",
-//     config: {
-//       tools: [{ googleSearch: {} }],
-//     },
-//     contents: `This is vido cdnURL: [${cdnURL}] ${PROMPT}`,
-//   })
-
-//   const rawText = response.text ?? ""
-//   const cleaned = extractJSON(rawText)
-//   const parsed: Analysis = JSON.parse(cleaned)
-//   return parsed
-// }
-
-
-
-
-// export const analyzeVideo = async (cdnURL: string): Promise<Analysis> => {
-
-
-//   try {
-//     const result = await analyzeWithGemini(cdnURL)
-//     logger.info("Analysis completed via Gemini")
-//     return result
-//   } catch (geminiError) {
-//     logger.warn(geminiError, "Gemini error:")
-//     throw new Error(
-//       "LLM providers failed. Please check your API keys and video file."
-//     )
-//   }
-
-// }
-
-// import { GoogleGenAI } from "@google/genai";
-
-// const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// export const analyzeVideo = async (cdnURL:string) => {
-//   try {
-//     const promptText = `You are a Web Content & Video Analysis AI. Your job is to deeply analyze the provided video.
 
 // STEP 1 — Watch the video fully to extract metadata, visual context, and audio cues.
 // STEP 2 — Transcribe the spoken audio verbatim with accurate timestamps.
@@ -165,130 +69,6 @@
 // - Ensure the contents are a single, fully valid JSON object matching the requested schema.
 // - CRITICAL: All internal double quotes (") inside your string values MUST be escaped as \\" to ensure valid JSON syntax. Newlines must be escaped as \\n.
 
-// Return this exact structure:
-// {
-//   "title": "string with 1 relevant emoji at start — use the actual video title or a highly descriptive one if missing",
-//   "source": {
-//     "url": "the original URL provided",
-//     "platform": "Instagram",
-//     "contentType": "video",
-//     "author": "channel name or username if visible in video, else unknown",
-//     "publishedAt": ""
-//   },
-//   "summary": {
-//     "overview": "3-5 sentence detailed overview covering the main topic, context, and conclusion of the video",
-//     "keyPoints": ["detailed point 1", "detailed point 2", "detailed point 3"]
-//   },
-//   "transcription": [
-//     {
-//       "timestamp": "MM:SS",
-//       "text": "Full verbatim or near-verbatim transcript segment."
-//     }
-//   ],
-//   "verification": {
-//     "claims": [],
-//     "overallVerdict": "verified",
-//     "factCheckReport": "Not applicable for this short media asset."
-//   },
-//   "resources": []
-// }`;
-
-//     const response = await ai.models.generateContent({
-//       model: "gemini-2.5-flash", // Use a multimodal model that handles video natively
-//       contents: [
-//         {
-//           fileData: {
-//             fileUri: cdnURL,
-//             mimeType: "video/mp4"
-//           }
-//         },
-//         {
-//           text: promptText
-//         }
-//       ]
-//     });
-
-//     const rawText = response.text;
-
-//     // Extract the JSON block safely from the markdown wrapper
-//     const jsonMatch = rawText.match(/```json([\s\S]*?)```/);
-//     const cleanJsonText = jsonMatch ? jsonMatch[1].trim() : rawText.trim();
-
-//     return JSON.parse(cleanJsonText);
-
-//   } catch (error) {
-//     console.error("Gemini processing failed:", error);
-//     throw error;
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { GoogleGenAI } from "@google/genai";
-// import { EnvConfig } from "../config/env.config.js";
-// import { AppError } from "../errors/AppErrors.errors.js";
-
-
-// export interface Analysis {
-//   title: string;
-//   source: {
-//     url: string;
-//     platform: string;
-//     contentType: string;
-//     author: string;
-//     publishedAt: string;
-//   };
-//   summary: {
-//     overview: string;
-//     keyPoints: string[];
-//   };
-//   transcription: Array<{
-//     timestamp: string;
-//     text: string;
-//   }>;
-//   verification: {
-//     claims: Array<{
-//       claim: string;
-//       verdict: string;
-//       explanation: string;
-//     }>;
-//     overallVerdict: string;
-//     factCheckReport: string;
-//   };
-//   resources: Array<{
-//     platform: string;
-//     url: string;
-//     relevance: string;
-//   }>;
-// }
-
-
-// const apiKey = EnvConfig.GEMINI_KEY;
-// if (!apiKey) {
-//   throw new AppError("CRITICAL: GEMINI_API_KEY environment variable is missing.",404);
-// }
-
-// const ai = new GoogleGenAI({ apiKey });
-
-
-// export async function analyzeVideo(cdnURL: string): Promise<Analysis> {
-//   const promptText = `You are a Web Content & Video Analysis AI. Your job is to deeply analyze the provided video.
-
 // STEP 1 — Watch the video fully to extract metadata, visual context, and audio cues.
 // STEP 2 — Transcribe the spoken audio verbatim with accurate timestamps.
 // STEP 3 — Compose your response based strictly on the video content.
@@ -298,64 +78,12 @@
 // - Do NOT write any conversational text or explanations outside the code block.
 // - Ensure the contents are a single, fully valid JSON object matching the requested schema.
 // - CRITICAL: All internal double quotes (") inside your string values MUST be escaped as \\" to ensure valid JSON syntax. Newlines must be escaped as \\n.
-
-// Return this exact structure:
-// {
-//   "title": "string with 1 relevant emoji at start — use the actual video title or a highly descriptive one if missing",
-//   "source": {
-//     "url": "the original URL provided",
-//     "platform": "Instagram",
-//     "contentType": "video",
-//     "author": "channel name or username if visible in video, else unknown",
-//     "publishedAt": ""
-//   },
-//   "summary": {
-//     "overview": "3-5 sentence detailed overview covering the main topic, context, and conclusion of the video",
-//     "keyPoints": ["detailed point 1", "detailed point 2", "detailed point 3"]
-//   },
-//   "transcription": [
-//     {
-//       "timestamp": "MM:SS",
-//       "text": "Full verbatim or near-verbatim transcript segment."
-//     }
-//   ],
-//   "verification": {
-//     "claims": [],
-//     "overallVerdict": "verified",
-//     "factCheckReport": "Not applicable for this short media asset."
-//   },
-//   "resources": []
-// }`;
-
-//   const response = await ai.models.generateContent({
-//     model: "gemini-2.5-flash",
-//     contents: [
-//       { fileData: { fileUri: cdnURL, mimeType: "video/mp4" } },
-//       { text: promptText }
-//     ]
-//   });
-
- 
-//   const rawText: string = response.text ?? ""; 
-  
-//   if (!rawText) {
-//     throw new Error("LLM provider returned an empty or undefined response text.");
-//   }
-
- 
-//   const jsonMatch = rawText.match(/```json([\s\S]*?)```/);
-//   const cleanJsonText = jsonMatch && jsonMatch[1] ? jsonMatch[1].trim() : rawText.trim();
-
-//   return JSON.parse(cleanJsonText) as Analysis;
-// }
-
-
-
-
 
 
 import { GoogleGenAI } from "@google/genai";
 import { EnvConfig } from "../config/env.config.js";
+import { AppError } from "../errors/AppErrors.errors.js";
+import { logger } from "../utility/logger.utility.js";
 
 export interface Analysis {
   title: string;
@@ -383,6 +111,39 @@ if (!apiKey) {
   throw new Error("CRITICAL: GEMINI_API_KEY environment variable is missing.");
 }
 const ai = new GoogleGenAI({ apiKey });
+const geminiModels = EnvConfig.GEMINI_MODELS.split(",").map((model) => model.trim()).filter(Boolean);
+
+function getProviderStatus(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+
+  const providerError = error as {
+    status?: unknown;
+    error?: { code?: unknown };
+    message?: unknown;
+  };
+
+  if (typeof providerError.status === "number") return providerError.status;
+  if (typeof providerError.error?.code === "number") return providerError.error.code;
+
+  if (typeof providerError.message === "string") {
+    try {
+      const parsed = JSON.parse(providerError.message) as { error?: { code?: unknown } };
+      return typeof parsed.error?.code === "number" ? parsed.error.code : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+function isRetryableProviderStatus(status: number | undefined): boolean {
+  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
 
 export interface AnalysisSourceContext {
   originalUrl: string
@@ -437,25 +198,49 @@ Return this exact structure:
   const isYoutubeWatchUri =
     /youtube\.com\/watch\?v=|youtu\.be\//i.test(cdnURL)
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.8-flash",
-    contents: [
-      isYoutubeWatchUri
-        ? { fileData: { fileUri: cdnURL } }
-        : { fileData: { fileUri: cdnURL, mimeType: "video/mp4" } },
-      { text: promptText }
-    ]
-  });
+  const contents = [
+    isYoutubeWatchUri
+      ? { fileData: { fileUri: cdnURL } }
+      : { fileData: { fileUri: cdnURL, mimeType: "video/mp4" } },
+    { text: promptText }
+  ];
 
-  const rawText: string = response.text ?? ""; 
-  if (!rawText) {
-    throw new Error("LLM provider returned an empty or undefined response text.");
+  // Retry temporary provider capacity failures, then try the next configured model.
+  for (const model of geminiModels) {
+    for (let attempt = 0; attempt <= EnvConfig.GEMINI_MAX_RETRIES; attempt += 1) {
+      try {
+        const response = await ai.models.generateContent({ model, contents });
+        const rawText: string = response.text ?? "";
+        if (!rawText) {
+          throw new Error("LLM provider returned an empty or undefined response text.");
+        }
+
+        const jsonMatch = rawText.match(/```json([\s\S]*?)```/);
+        const cleanJsonText = jsonMatch && jsonMatch[1] ? jsonMatch[1].trim() : rawText.trim();
+        return JSON.parse(cleanJsonText) as Analysis;
+      } catch (error) {
+        const status = getProviderStatus(error);
+        const canRetry = isRetryableProviderStatus(status) && attempt < EnvConfig.GEMINI_MAX_RETRIES;
+
+        if (!canRetry) {
+          if (isRetryableProviderStatus(status)) {
+            logger.warn({ model, status }, "Gemini model exhausted retries");
+            break;
+          }
+          throw error;
+        }
+
+        const delay = 1000 * 2 ** attempt;
+        logger.warn({ model, status, attempt: attempt + 1, delay }, "Retrying Gemini request");
+        await wait(delay);
+      }
+    }
   }
 
-  const jsonMatch = rawText.match(/```json([\s\S]*?)```/);
-  const cleanJsonText = jsonMatch && jsonMatch[1] ? jsonMatch[1].trim() : rawText.trim();
-
-  return JSON.parse(cleanJsonText) as Analysis;
+  throw new AppError(
+    "The AI service is temporarily overloaded. Please try again in a few moments.",
+    503,
+  );
 }
 
 
