@@ -29,7 +29,6 @@ export const HomePage = () => {
   const handleHistorySelect = (r: AnalysisResult) => {
 
     reset()
-    setTimeout(() => analyse(''), 0)
 
     setSidebarOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -117,7 +116,7 @@ export const HomePage = () => {
           )}
 
           <AnalyseForm
-            onSubmit={(url) => { setExternalResult(null); analyse(url) }}
+            onSubmit={(url, platform) => { setExternalResult(null); analyse(url, platform) }}
             loading={loading}
           />
 

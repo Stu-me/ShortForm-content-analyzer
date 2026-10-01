@@ -18,12 +18,12 @@ export const useAnalyse = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<AppError | null>(null)
 
-  const analyse = async (url: string) => {
+  const analyse = async (url: string, platform: string) => {
     setLoading(true)
     setError(null)
     setResult(null)
     try {
-      const data = await analyseApi.analyse(url)
+      const data = await analyseApi.analyse(url, platform)
       setResult(data)
     } catch (err) {
       if (isAppError(err)) {

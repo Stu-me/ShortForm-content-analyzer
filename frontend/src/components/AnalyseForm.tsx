@@ -14,7 +14,7 @@ import xLogo         from '../assets/x.png'
 // ── Platform definitions ─────────────────────────────────────────────────────
 
 interface Platform {
-  id: string
+  id: PlatformId
   label: string
   logo: string | null   // image import — null = icon fallback (YouTube)
   icon: string          // fallback text icon
@@ -22,6 +22,19 @@ interface Platform {
   placeholder: string
   stars: number
   note: string
+}
+
+type PlatformId = 'tiktok' | 'instagram' | 'youtube' | 'snapchat' | 'facebook' | 'x' | 'reddit' | 'pinterest'
+
+const PLATFORM_HOSTS: Record<PlatformId, string[]> = {
+  tiktok: ['tiktok.com', 'vm.tiktok.com'],
+  instagram: ['instagram.com'],
+  youtube: ['youtube.com', 'youtu.be'],
+  snapchat: ['snapchat.com'],
+  facebook: ['facebook.com', 'fb.watch'],
+  x: ['x.com', 'twitter.com'],
+  reddit: ['reddit.com', 'v.redd.it'],
+  pinterest: ['pinterest.com', 'pin.it'],
 }
 
 const PLATFORMS: Platform[] = [
@@ -122,7 +135,7 @@ const Stars = ({ count, color }: { count: number; color: string }) => (
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface Props {
-  onSubmit: (url: string) => void
+  onSubmit: (url: string, platform: PlatformId) => void
   loading: boolean
 }
 
@@ -135,8 +148,18 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
     e.preventDefault()
     const parse = UrlSchema.safeParse({ url })
     if (!parse.success) { setError(parse.error.issues[0].message); return }
+
+    const hostname = new URL(parse.data.url).hostname.replace(/^www\./, '')
+    const matchesSelection = PLATFORM_HOSTS[activePlatform.id].some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+    )
+    if (!matchesSelection) {
+      setError(`This URL is not a ${activePlatform.label} link. Select the matching platform.`)
+      return
+    }
+
     setError('')
-    onSubmit(parse.data.url)
+    onSubmit(parse.data.url, activePlatform.id)
   }
 
   return (
