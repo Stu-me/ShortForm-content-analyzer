@@ -17,29 +17,49 @@ export const useAnalyse = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<AppError | null>(null)
+  const [statusCode, setStatusCode] = useState<number | null>(null)
 
   const analyse = async (url: string, platform: string) => {
     setLoading(true)
     setError(null)
     setResult(null)
+    setStatusCode(null)
+
     try {
       const data = await analyseApi.analyse(url, platform)
       setResult(data)
+      setStatusCode(200)
     } catch (err) {
       if (isAppError(err)) {
         setError(err)
+        setStatusCode(err.status ?? 500)
       } else {
-        // Fallback for anything that slips past the interceptor
-        setError({
+        // Fallback for anything that slips past the interceptor.
+        const fallbackError: AppError = {
           kind: 'unknown',
           title: 'Something went wrong',
           detail: err instanceof Error ? err.message : 'An unexpected error occurred.',
-        })
+            status: 0,
+        }
+
+        setError(fallbackError)
+        setStatusCode(fallbackError.status ?? 0)
       }
     } finally {
       setLoading(false)
     }
   }
 
-  return { result, loading, error, analyse, reset: () => setResult(null) }
+  return {
+    result,
+    loading,
+    error,
+    statusCode,
+    analyse,
+    reset: () => {
+      setResult(null)
+      setStatusCode(null)
+      setError(null)
+    },
+  }
 }

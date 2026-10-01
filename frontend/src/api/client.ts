@@ -61,6 +61,7 @@ function buildAppError(error: unknown): AppError {
       kind: 'network',
       title: 'Cannot reach the server',
       detail: 'Check your internet connection or try again in a moment.',
+      status: 0,
     }
   }
 
@@ -107,7 +108,12 @@ function buildAppError(error: unknown): AppError {
   }
 
   const matched = map[status]
-  if (matched) return matched
+  if (matched) {
+    return {
+      ...matched,
+      status,
+    }
+  }
 
   // 5xx catchall
   if (status >= 500) {
@@ -115,6 +121,7 @@ function buildAppError(error: unknown): AppError {
       kind: 'unknown',
       title: `Server error (${status})`,
       detail: serverMessage ?? 'Something went wrong on our end. Please try again shortly.',
+      status,
     }
   }
 
@@ -123,6 +130,7 @@ function buildAppError(error: unknown): AppError {
     kind: 'unknown',
     title: `Request error (${status})`,
     detail: serverMessage ?? 'The request could not be completed. Check the URL and try again.',
+    status,
   }
 }
 

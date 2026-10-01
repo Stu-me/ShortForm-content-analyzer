@@ -4,11 +4,11 @@ import { Button } from './ui/Button'
 
 import tiktokLogo    from '../assets/tiktok.png'
 import instaLogo     from '../assets/insta.jpeg'
-import youtubeLogo   from '../assets/youtubelogo.jpeg'
+import youtubeLogo   from '../assets/youtubelogo.jpg'
 import facebookLogo  from '../assets/facebook.png'
 import snapchatLogo  from '../assets/snapchat.jpeg'
 import redditLogo    from '../assets/reddit.png'
-import pinterestLogo from '../assets/pinterest.png'
+import pinterestLogo from '../assets/pinterest.webp'
 import xLogo         from '../assets/x.png'
 
 // ── Platform definitions ─────────────────────────────────────────────────────
@@ -143,6 +143,39 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
   const [url, setUrl]                     = useState('')
   const [error, setError]                 = useState('')
   const [activePlatform, setActivePlatform] = useState<Platform>(PLATFORMS[1]) // Instagram default
+  const [marqueeOffset, setMarqueeOffset] = useState(0)
+
+  // Duplicate the list so the marquee can loop without a visible jump when the user
+  // navigates left/right with the arrow controls.
+  const marqueePlatforms = [...PLATFORMS, ...PLATFORMS]
+
+  // We move by roughly one card at a time so the motion feels deliberate and not chaotic.
+  const MARQUEE_STEP = 210
+
+  const moveMarquee = (direction: 'left' | 'right', event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault()
+    event?.stopPropagation()
+
+    const step = direction === 'left' ? -MARQUEE_STEP : MARQUEE_STEP
+    const maxOffset = MARQUEE_STEP * (marqueePlatforms.length / 2)
+
+    setMarqueeOffset((current) => {
+      const next = current + step
+
+      // Wrap the movement so the track stays continuous and never drifts out of bounds.
+      if (next < 0) return maxOffset
+      if (next > maxOffset) return 0
+      return next
+    })
+  }
+
+  const handleMoveLeft = (event: React.MouseEvent<HTMLButtonElement>) => {
+    moveMarquee('left', event)
+  }
+
+  const handleMoveRight = (event: React.MouseEvent<HTMLButtonElement>) => {
+    moveMarquee('right', event)
+  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,177 +231,203 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
         </div>
       </form>
 
-      {/* ── Platform grid ── */}
+      {/* ── Platform marquee ── */}
       <div style={{ marginTop: 24 }}>
         <p style={{
-          fontSize: 10,
+          fontSize:20,
           color: 'var(--muted)',
           letterSpacing: '.09em',
           textTransform: 'uppercase',
           fontWeight: 600,
-          marginBottom: 12,
+          marginBottom: 18,
         }}>
-          Supported platforms
+          Select platforms( --- for fun --- )
         </p>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-          gap: 10,
-        }}>
-          {PLATFORMS.map((p) => {
-            const isActive = activePlatform.id === p.id
-            return (
-              <button
-                key={p.id}
-                onClick={() => { setActivePlatform(p); setError('') }}
-                type="button"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: 10,
-                  padding: '14px 14px 12px',
-                  /* glassmorphism */
-                  background: isActive
-                    ? `${p.color}20`
-                    : 'rgba(255,255,255,0.04)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: `1.5px solid ${isActive ? p.color + 'aa' : 'rgba(255,255,255,0.10)'}`,
-                  borderRadius: 12,
-                  boxShadow: isActive
-                    ? `0 4px 20px ${p.color}22, inset 0 1px 0 rgba(255,255,255,0.12)`
-                    : '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
-                  cursor: 'pointer',
-                  transition: 'border-color .18s, background .18s, box-shadow .18s, transform .12s',
-                  outline: 'none',
-                  textAlign: 'left',
-                  width: '100%',
-                }}
-                onMouseEnter={(e) => {
-                  if (isActive) return
-                  e.currentTarget.style.borderColor = p.color + '60'
-                  e.currentTarget.style.background   = `${p.color}12`
-                  e.currentTarget.style.transform    = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow    = `0 6px 16px ${p.color}18, inset 0 1px 0 rgba(255,255,255,0.10)`
-                }}
-                onMouseLeave={(e) => {
-                  if (isActive) return
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'
-                  e.currentTarget.style.background   = 'rgba(255,255,255,0.04)'
-                  e.currentTarget.style.transform    = 'translateY(0)'
-                  e.currentTarget.style.boxShadow    = '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)'
-                }}
-              >
-                {/* Logo / icon */}
-                {p.logo ? (
-                  <img
-                    src={p.logo}
-                    alt={p.label}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      objectFit: 'cover',
-                      filter: isActive ? 'none' : 'grayscale(30%)',
-                      transition: 'filter .15s',
-                      flexShrink: 0,
-                    }}
-                  />
-                ) : null}
-
-                {/* Text block */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, width: '100%' }}>
-                  <span style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: isActive ? 'var(--text)' : 'var(--muted)',
-                    transition: 'color .15s',
-                    letterSpacing: '.01em',
-                  }}>
-                    {p.label}
-                  </span>
-                  <span style={{
-                    fontSize: 10,
-                    color: 'var(--muted)',
-                    lineHeight: 1.3,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}>
-                    {p.note}
-                  </span>
-                  <Stars count={p.stars} color={isActive ? p.color : 'var(--muted2)'} />
-                </div>
-              </button>
-            )
-          })}
-
-          {/* Coming soon card */}
-          <div
+        {/* The controls are placed inside the same carousel panel so the user can nudge the
+            moving platform cards from the left and right edges, without creating a separate UI block. */}
+        <div style={{ position: 'relative', width: '100%' }}>
+          <button
+            type="button"
+            aria-label="Scroll platforms left"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleMoveLeft}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: 10,
-              padding: '14px 14px 12px',
-              background: 'rgba(255,255,255,0.02)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              border: '1.5px dashed rgba(255,255,255,0.12)',
-              borderRadius: 12,
+              position: 'absolute',
+              left: 8,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--muted)',
+              fontSize: 18,
+              lineHeight: 1,
+              cursor: 'pointer',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-              width: '100%',
-              cursor: 'default',
+              transition: 'background .18s ease, border-color .18s ease, color .18s ease',
             }}
           >
-            {/* Animated dots icon */}
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1.5px dashed rgba(255,255,255,0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              flexShrink: 0,
-            }}>
-              ✦
-            </div>
+            ‹
+          </button>
 
-            {/* Text */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <span style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: 'var(--muted)',
-                letterSpacing: '.01em',
-              }}>
-                More coming
-              </span>
-              <span style={{
-                fontSize: 10,
-                color: 'var(--muted)',
-                lineHeight: 1.4,
-              }}>
-                Fighting doom scroll,<br />one platform at a time
-              </span>
-              <span style={{
-                fontSize: 9,
-                color: 'var(--accent)',
-                fontWeight: 600,
-                letterSpacing: '.06em',
-                textTransform: 'uppercase',
-                marginTop: 2,
-              }}>
-                Stay tuned ↗
-              </span>
+          {/* The track is duplicated so the marquee can loop smoothly without a visible jump. */}
+          <div className="platform-marquee" style={{ overflow: 'hidden', width: '100%', borderRadius: 12, paddingLeft: 48, paddingRight: 48 }}>
+            <div
+              className="platform-marquee-track"
+              style={{
+                display: 'flex',
+                gap: 10,
+                width: 'max-content',
+                alignItems: 'stretch',
+                transform: `translateX(-${marqueeOffset}px)`,
+                transition: 'transform 0.45s ease',
+              }}
+            >
+              {marqueePlatforms.map((p, index) => {
+                const isActive = activePlatform.id === p.id
+                return (
+                  <button
+                    key={`${p.id}-${index}`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setActivePlatform(p)
+                      setError('')
+                    }}
+                    type="button"
+                    className="platform-marquee-card"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      padding: '14px 14px 12px',
+                      background: isActive
+                        ? `${p.color}20`
+                        : 'rgba(255,255,255,0.04)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      border: `1.5px solid ${isActive ? p.color + 'aa' : 'rgba(255,255,255,0.10)'}`,
+                      borderRadius: 12,
+                      boxShadow: isActive
+                        ? `0 4px 20px ${p.color}22, inset 0 1px 0 rgba(255,255,255,0.12)`
+                        : '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
+                      cursor: 'pointer',
+                      transition: 'border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease, filter .18s ease',
+                      outline: 'none',
+                      textAlign: 'left',
+                      width: 200,
+                      minWidth: 200,
+                      height: '100%',
+                      justifyContent: 'flex-start',
+                      transform: 'translateY(0)',
+                      filter: isActive ? 'saturate(1.05)' : 'saturate(0.9)',
+                      flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = p.color + 'cc'
+                      e.currentTarget.style.background   = `${p.color}18`
+                      e.currentTarget.style.transform    = 'translateY(-3px)'
+                      e.currentTarget.style.boxShadow    = `0 10px 22px ${p.color}26, inset 0 1px 0 rgba(255,255,255,0.12)`
+                      e.currentTarget.style.filter       = 'saturate(1.2)'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (isActive) {
+                        e.currentTarget.style.borderColor = p.color + 'aa'
+                        e.currentTarget.style.background   = `${p.color}20`
+                        e.currentTarget.style.transform    = 'translateY(0)'
+                        e.currentTarget.style.boxShadow    = `0 4px 20px ${p.color}22, inset 0 1px 0 rgba(255,255,255,0.12)`
+                        e.currentTarget.style.filter       = 'saturate(1.05)'
+                        return
+                      }
+
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'
+                      e.currentTarget.style.background   = 'rgba(255,255,255,0.04)'
+                      e.currentTarget.style.transform    = 'translateY(0)'
+                      e.currentTarget.style.boxShadow    = '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)'
+                      e.currentTarget.style.filter       = 'saturate(0.9)'
+                    }}
+                  >
+                    {/* Logo / icon */}
+                    {p.logo ? (
+                      <img
+                        src={p.logo}
+                        alt={p.label}
+                        style={{
+                          width: 150,
+                          height: 120,
+                          borderRadius: 8,
+                          objectFit: 'cover',
+                          filter: isActive ? 'none' : 'grayscale(30%)',
+                          transition: 'filter .15s',
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : null}
+
+                    {/* Text block */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, width: '100%' }}>
+                      <span style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: isActive ? 'var(--text)' : 'var(--muted)',
+                        transition: 'color .15s',
+                        letterSpacing: '.01em',
+                      }}>
+                        {p.label}
+                      </span>
+                      <span style={{
+                        fontSize: 10,
+                        color: 'var(--muted)',
+                        lineHeight: 1.3,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {p.note}
+                      </span>
+                      <Stars count={p.stars} color={isActive ? p.color : 'var(--muted2)'} />
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
+          <button
+            type="button"
+            aria-label="Scroll platforms right"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleMoveRight}
+            style={{
+              position: 'absolute',
+              right: 8,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--muted)',
+              fontSize: 18,
+              lineHeight: 1,
+              cursor: 'pointer',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              transition: 'background .18s ease, border-color .18s ease, color .18s ease',
+            }}
+          >
+            ›
+          </button>
         </div>
       </div>
     </div>

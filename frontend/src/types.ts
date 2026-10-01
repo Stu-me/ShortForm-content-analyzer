@@ -56,4 +56,5 @@ export interface AppError {
   kind: ErrorKind
   title: string
   detail: string
+  status?: number | null
 }

@@ -97,6 +97,56 @@ html, body, #root {
   animation: bufferingPulse 1.2s ease-in-out infinite;
 }
 
+.status-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+
+.status-flash.visible {
+  animation: statusFlash 0.7s ease-out forwards;
+}
+
+.status-flash.success {
+  background: rgba(34, 197, 94, 0.18);
+  box-shadow: inset 0 0 0 9999px rgba(34, 197, 94, 0.06);
+}
+
+.status-flash.error {
+  background: rgba(239, 68, 68, 0.18);
+  box-shadow: inset 0 0 0 9999px rgba(239, 68, 68, 0.06);
+}
+
+@keyframes statusFlash {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.platform-marquee {
+  position: relative;
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* The track position is controlled by AnalyseForm so the arrow buttons remain reliable. */
+.platform-marquee-track {
+  will-change: transform;
+}
+
 @keyframes bufferingPulse {
   0%, 100% { opacity: .3; transform: scaleX(.55); }
   50% { opacity: 1; transform: scaleX(1); }

@@ -6,6 +6,7 @@ import { AnalyseForm } from '../components/AnalyseForm'
 import { ResultCard } from '../components/ResultCard'
 import { HistoryList } from '../components/HistoryList'
 import { ErrorBanner } from '../components/ErrorBanner'
+import { StatusFlash } from '../components/StatusFlash'
 import { Button } from '../components/ui/Button'
 import type { AnalysisResult } from '../types'
 import logo from "../assets/logo.png"
@@ -14,7 +15,7 @@ import logo from "../assets/logo.png"
 
 export const HomePage = () => {
   const { userName, signOut } = useAuthStore()
-  const { result, loading, error, analyse, reset } = useAnalyse()
+  const { result, loading, error, statusCode, analyse, reset } = useAnalyse()
   const { theme, toggle: toggleTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -42,15 +43,18 @@ export const HomePage = () => {
   const displayed = externalResult ?? result
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex' }}>
+    <>
+      <StatusFlash statusCode={statusCode} />
+
+      <div style={{ minHeight: '100vh', display: 'flex' }}>
 
       {/* Sidebar */}
       <aside style={{
-        width: sidebarOpen ? 280 : 0,
+        width: sidebarOpen ? 380 : 0,
         flexShrink: 0,
-        borderRight: sidebarOpen ? '1px solid var(--border)' : 'none',
+        borderRight: sidebarOpen ? '4px solid var(--border)' : 'none',
         overflow: 'hidden',
-        transition: 'width .2s ease',
+        transition: 'width .8s ease',
         background: 'var(--surface)',
       }}>
         {sidebarOpen && <HistoryList onSelect={handleHistorySelect} />}
@@ -63,13 +67,13 @@ export const HomePage = () => {
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: 52, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <button onClick={() => setSidebarOpen((o) => !o)}
-              style={{ background: 'none', border: 'none', color: 'var(--muted2)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              style={{ background: 'none', border: 'none', color: 'var(--muted2)', fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               ☰
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {/* <span style={{ fontSize: 16 }}>◈</span> */}
-              <img style={{ width: 30 }} src={logo} alt="logo" />
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--accent)', letterSpacing: '-.02em' }}>ShortForm Content Analyzer</span>
+              <img style={{ width: 50 }} src={logo} alt="logo" />
+              <span style={{ fontSize: 24, fontWeight: 500, color: 'var(--accent)', letterSpacing: '-.02em' }}>ShortForm Content Analyzer</span>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -101,13 +105,13 @@ export const HomePage = () => {
         </header>
 
         {/* Content */}
-        <main style={{ flex: 1, maxWidth: 720, width: '100%', margin: '0 auto', padding: '40px 24px 80px' }}>
+        <main style={{ flex: 1, maxWidth: 820, width: '100%', margin: '0 auto', padding: '40px 24px 80px' }}>
 
           {/* Hero — only when no result */}
           {!displayed && !loading && (
             <div style={{ marginBottom: 36, textAlign: 'center' }}>
-              <h1 style={{ fontSize: 28, fontWeight: 300, color: 'var(--accent)', letterSpacing: '-.03em', marginBottom: 8 }}>
-                What do you want to analyse?
+              <h1 style={{ fontSize: 38, fontWeight: 300, color: 'var(--accent)', letterSpacing: '-.03em', marginBottom: 8 }}>
+                Analyze content to paralyze doomscrolling ?
               </h1>
               <p style={{ fontSize: 13, color: 'var(--muted)' }}>
                 Instagram - paste URL | YouTube and blogs coming soon!
@@ -147,5 +151,6 @@ export const HomePage = () => {
         </main>
       </div>
     </div>
+    </>
   )
 }

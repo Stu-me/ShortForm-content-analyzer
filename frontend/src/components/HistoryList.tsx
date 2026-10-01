@@ -78,7 +78,7 @@ export const HistoryList = ({ onSelect }: Props) => {
 
         {/* Initial loading skeleton */}
         {!initialLoaded && loading && (
-          <p style={{ fontSize: 12, color: 'var(--muted)', textAlign: 'center', padding: '24px 16px' }}>
+          <p style={{ fontSize: 28, color: 'var(--muted)', textAlign: 'center', padding: '34px 26px' }}>
             Loading…
           </p>
         )}
@@ -95,11 +95,11 @@ export const HistoryList = ({ onSelect }: Props) => {
           <div
             key={item._id}
             style={{
-              padding: '10px 12px',
+              padding: '13px 12px',
               borderRadius: 6,
               cursor: 'pointer',
               marginBottom: 2,
-              border: '1px solid transparent',
+              border: '2px solid transparent',
               transition: 'background .12s, border-color .12s',
             }}
             onMouseEnter={(e) => {
@@ -144,7 +144,7 @@ export const HistoryList = ({ onSelect }: Props) => {
                   background: 'none',
                   border: 'none',
                   color: 'var(--muted)',
-                  fontSize: 14,
+                  fontSize: 24,
                   lineHeight: 1,
                   flexShrink: 0,
                   padding: 2,
