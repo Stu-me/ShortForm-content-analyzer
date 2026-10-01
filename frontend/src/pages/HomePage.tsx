@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuthStore } from '../store/auth.store'
 import { useAnalyse } from '../hooks/useAnalyse'
 import { useTheme } from '../hooks/useTheme'
@@ -19,6 +19,23 @@ export const HomePage = () => {
   const { theme, toggle: toggleTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const sidebarRef = useRef<HTMLElement | null>(null)
+  const sidebarToggleRef = useRef<HTMLButtonElement | null>(null)
+
+  // Close the history sidebar for document clicks outside the sidebar and its toggle.
+  useEffect(() => {
+    if (!sidebarOpen) return
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (sidebarRef.current?.contains(target) || sidebarToggleRef.current?.contains(target)) return
+      setSidebarOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    // Remove the listener whenever the sidebar closes or the page unmounts.
+    return () => document.removeEventListener('pointerdown', closeOnOutsideClick)
+  }, [sidebarOpen])
 
 
 
@@ -49,7 +66,7 @@ export const HomePage = () => {
       <div style={{ minHeight: '100vh', display: 'flex' }}>
 
       {/* Sidebar */}
-      <aside style={{
+      <aside ref={sidebarRef} style={{
         width: sidebarOpen ? 380 : 0,
         flexShrink: 0,
         borderRight: sidebarOpen ? '4px solid var(--border)' : 'none',
@@ -66,7 +83,7 @@ export const HomePage = () => {
         {/* Nav */}
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: 52, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={() => setSidebarOpen((o) => !o)}
+            <button ref={sidebarToggleRef} onClick={() => setSidebarOpen((o) => !o)}
               style={{ background: 'none', border: 'none', color: 'var(--muted2)', fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               ☰
             </button>

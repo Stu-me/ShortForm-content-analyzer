@@ -10,6 +10,7 @@ import snapchatLogo  from '../assets/snapchat.jpeg'
 import redditLogo    from '../assets/reddit.png'
 import pinterestLogo from '../assets/pinterest.webp'
 import xLogo         from '../assets/x.png'
+import tiktokMeme    from '../assets/tiktokMeme.png'
 
 // ── Platform definitions ─────────────────────────────────────────────────────
 
@@ -144,6 +145,7 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
   const [error, setError]                 = useState('')
   const [activePlatform, setActivePlatform] = useState<Platform>(PLATFORMS[1]) // Instagram default
   const [marqueeOffset, setMarqueeOffset] = useState(0)
+  const [showTiktokMeme, setShowTiktokMeme] = useState(false)
 
   // Duplicate the list so the marquee can loop without a visible jump when the user
   // navigates left/right with the arrow controls.
@@ -241,7 +243,7 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
           fontWeight: 600,
           marginBottom: 18,
         }}>
-          Select platforms( --- for fun --- )
+          Select platforms to analyze
         </p>
 
         {/* The controls are placed inside the same carousel panel so the user can nudge the
@@ -299,6 +301,7 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
                       e.stopPropagation()
                       setActivePlatform(p)
                       setError('')
+                      if (p.id === 'tiktok') setShowTiktokMeme(true)
                     }}
                     type="button"
                     className="platform-marquee-card"
@@ -430,6 +433,32 @@ export const AnalyseForm = ({ onSubmit, loading }: Props) => {
           </button>
         </div>
       </div>
+
+      {showTiktokMeme && (
+        <div
+          className="tiktok-meme-overlay"
+          role="presentation"
+          onClick={() => setShowTiktokMeme(false)}
+        >
+          <div
+            className="tiktok-meme-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="TikTok meme"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Close TikTok meme"
+              className="tiktok-meme-close"
+              onClick={() => setShowTiktokMeme(false)}
+            >
+              ×
+            </button>
+            <img src={tiktokMeme} alt="TikTok meme" />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
