@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Shared validation rules keep registration, sign-in, and password reset consistent.
 const USERNAME_RULE = z
     .string()
     .min(3, "Too Short!")
@@ -27,12 +28,33 @@ const SignInSchema = z.object({
   password: PASS_RULE
 });
 
+const VerifyOtpSchema = z.object({
+  email: z.email("Invalid Email"),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be a 6-digit number"),
+});
+
+const ForgotPasswordSchema = z.object({
+  email: z.email("Invalid Email"),
+});
+
+const ResetPasswordSchema = z.object({
+  resetToken: z.string().min(1, "Reset token is required"),
+  newPassword: PASS_RULE,
+});
+
 export const AuthSchema = {
   signUp:SignUpSchema,
-  signIn: SignInSchema
+  signIn: SignInSchema,
+  verifyRegistrationOtp: VerifyOtpSchema,
+  forgotPassword: ForgotPasswordSchema,
+  verifyForgotPasswordOtp: VerifyOtpSchema,
+  resetPassword: ResetPasswordSchema,
 }
 
 export namespace Auth {
   export type SignUp = z.infer<typeof SignUpSchema>
   export type SignIn = z.infer<typeof SignInSchema>
+  export type VerifyOtp = z.infer<typeof VerifyOtpSchema>
+  export type ForgotPassword = z.infer<typeof ForgotPasswordSchema>
+  export type ResetPassword = z.infer<typeof ResetPasswordSchema>
 }
