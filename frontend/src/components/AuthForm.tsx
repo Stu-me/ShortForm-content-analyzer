@@ -9,7 +9,12 @@ type Mode = 'signin' | 'signup'
 type Fields = { userName: string; email: string; password: string }
 type Errors = Partial<Record<keyof Fields, string>>
 
-export const AuthForm = () => {
+interface Props {
+  onSignUpRequested: (email: string) => void
+  onForgotPassword: () => void
+}
+
+export const AuthForm = ({ onSignUpRequested, onForgotPassword }: Props) => {
   const [mode, setMode] = useState<Mode>('signin')
   const [fields, setFields] = useState<Fields>({ userName: '', email: '', password: '' })
   const [errors, setErrors] = useState<Errors>({})
@@ -43,7 +48,10 @@ export const AuthForm = () => {
 
     setLoading(true)
     try {
-      if (mode === 'signup') await signUp(parse.data as SignUpInput)
+      if (mode === 'signup') {
+        await signUp(parse.data as SignUpInput)
+        onSignUpRequested((parse.data as SignUpInput).email)
+      }
       else await signIn(parse.data as SignInInput)
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong')
@@ -86,6 +94,16 @@ export const AuthForm = () => {
           {mode === 'signin' ? 'Sign in' : 'Sign up'}
         </Button>
       </form>
+
+      {mode === 'signin' && (
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          style={{ display: 'block', margin: '16px auto 0', background: 'none', border: 'none', color: 'var(--muted2)', cursor: 'pointer', fontSize: 12, textDecoration: 'underline' }}
+        >
+          Forgot password?
+        </button>
+      )}
 
       <p style={{ marginTop: 20, fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>
         {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}

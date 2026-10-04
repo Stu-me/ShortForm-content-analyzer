@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authApi } from '../api/auth'
-import type { SignUpInput, SignInInput } from '../validate/auth.validate'
+import type { OtpInput, SignUpInput, SignInInput } from '../validate/auth.validate'
 
 interface AuthState {
   userName: string | null
   isAuth: boolean
   signUp: (data: SignUpInput) => Promise<void>
+  verifyRegistrationOtp: (data: OtpInput) => Promise<void>
   signIn: (data: SignInInput) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -18,8 +19,13 @@ export const useAuthStore = create<AuthState>()(
       isAuth: false,
 
       signUp: async (data) => {
-        const res = await authApi.signUp(data)
-        set({ userName: res.User.userName, isAuth: true })
+        // Signup only starts verification; the backend creates the account after OTP validation.
+        await authApi.signUp(data)
+      },
+
+      verifyRegistrationOtp: async (data) => {
+        const res = await authApi.verifyRegistrationOtp(data)
+        set({ userName: res.user.userName, isAuth: true })
       },
 
 

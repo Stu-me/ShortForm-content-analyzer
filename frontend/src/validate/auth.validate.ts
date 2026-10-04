@@ -26,6 +26,20 @@ export const SignInSchema = z.object({
   password: PASS_RULE,
 })
 
+export const OtpSchema = z.object({
+  email: z.string().email('Invalid email'),
+  otp: z.string().regex(/^\d{6}$/, 'OTP must be a 6-digit number'),
+})
+
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email'),
+})
+
+export const ResetPasswordSchema = z.object({
+  resetToken: z.string().min(1, 'Reset token is required'),
+  newPassword: PASS_RULE,
+})
+
 export const UrlSchema = z.object({
   url: z
     .string()
@@ -42,4 +56,7 @@ export const UrlSchema = z.object({
 
 export type SignUpInput = z.infer<typeof SignUpSchema>
 export type SignInInput = z.infer<typeof SignInSchema>
+export type OtpInput = z.infer<typeof OtpSchema>
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>
 export type UrlInput = z.infer<typeof UrlSchema>
