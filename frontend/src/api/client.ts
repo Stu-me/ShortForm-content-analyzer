@@ -97,8 +97,8 @@ function buildAppError(error: unknown): AppError {
     },
     401: {
       kind: 'auth',
-      title: 'Session expired',
-      detail: 'You\'ve been signed out. Please log in again.',
+      title: 'Authentication failed',
+      detail: serverMessage ?? 'Your credentials could not be verified.',
     },
     403: {
       kind: 'auth',
@@ -139,7 +139,11 @@ function isAxiosError(err: unknown): err is import('axios').AxiosError {
 }
 
 api.interceptors.response.use(null, (error) => {
-  if (isAxiosError(error) && error.response?.status === 401) {
+  const requestUrl = isAxiosError(error) ? error.config?.url ?? '' : ''
+  const isAuthRequest = requestUrl.includes('/auth/')
+
+  // Auth forms need to render credential and validation errors instead of being redirected.
+  if (isAxiosError(error) && error.response?.status === 401 && !isAuthRequest) {
     window.location.href = '/auth'
   }
   return Promise.reject(buildAppError(error))
